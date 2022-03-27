@@ -1,5 +1,9 @@
 #include <iostream>
+#include <time.h>
+#include <ncurses.h>
+
 using namespace std;
+
 enum eDir {STOP = 0, LEFT = 1, UPLEFT = 2, DOWNLEFT = 3, RIGHT = 4, UPRIGHT = 5, DOWNRIGHT = 6};
 
 //ball class
@@ -74,18 +78,84 @@ class cBall
    }
 };
 
-int main() {
-  cBall c(0, 0);
-  cout << c << endl;
-  c.randomDirection();
-  cout << c << endl;
-  c.Move();
-  cout << c << endl;
-  c.randomDirection();
-  c.Move();
-  cout << c << endl;
+//paddle object
+class cPaddle
+{
+private:
+    int x, y;
+    int originalX, originalY;
+public:
+    cPaddle()
+    {
+        x = y = 0;
+    }
+    cPaddle(int posX, int posY) : cPaddle()
+    {
+        originalX = posX;
+        originalY = posY;
+        x = posX;
+        y = posY;
+    }
+    inline void Reset() { x = originalX; y = originalY; }
+    inline int getX() { return x; }
+    inline int getY() { return y; }
+    inline void moveUp() { y--; }
+    inline void moveDown() { y++; }
+    friend ostream & operator<<(ostream & o, cPaddle c)
+    {
+        o << "Paddle [" << c.x << "," << c.y << "]";
+        return o;
+    }
+};
 
+class cGameManager
+{
+  private:  
+    int width, height;
+    int score1, score2;
+    char up1, down1, up2, down2;
+    bool quit;
+    cBall * ball;
+    cPaddle *player1;
+    cPaddle *player2;
 
+  public:  
+    cGameManager (int w, int h)
+    {
+      srand(time (NULL));
+      quit = false;
+      up1 = 'w'; up2 ='i';
+      down1 = 's'; down2 = 'k';
+      score1 = score2 = 0;
+      width = w; height = h;
+      ball = new cBall(w/2, h/2);
+      player1 = new cPaddle(1, h/2 - 3);
+      player2 = new cPaddle(w - 2, h/2 - 3);
+    }
+
+    //free game set of data
+    ~cGameManager()
+    {
+      delete ball, player1, player2;
+    }
+
+    //keep score by pointing paddle to player
+    void ScoreUp(cPaddle * player)
+    {
+      if(player == player1)
+        score1++;
+      else if (player == player2)
+        score2++;
+      
+      ball->Reset();
+      player1->Reset();
+      player2->Reset();
+    }
+};
+
+int main() 
+{
+  
   
   return 0;
 }
